@@ -17,18 +17,21 @@ export class News extends Component {
         category: PropTypes.string,
     }
     
-
-    constructor() {
-        super()
+    capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+    constructor(props) {
+        super(props)
         this.state = {
             articles: [],
             loading: false,
             page: 1
         }
+        document.title = `NewsToday-${this.capitalizeFirstLetter(this.props.category)}`
     }
     // Refactored nextPage() previousPage()
     async updatePage (){
-        let url = `https://newsapi.org/v2/top-headlines?&country=${this.props.country}&category=${this.props.category}&apiKey=aed587c050be4bbbb70d7d31c1fc6331&page=1&pageSize=${this.props.pagesize}`
+        let url = `https://newsapi.org/v2/top-headlines?&country=${this.props.country}&category=${this.props.category}&apiKey=aed587c050be4bbbb70d7d31c1fc6331&page=${this.state.page}&pageSize=${this.props.pagesize}`
         let data = await fetch(url)
         this.setState({loading: true})
         let parseddata = await data.json()
@@ -38,25 +41,19 @@ export class News extends Component {
     }
 
     async componentDidMount(){
-        let url = `https://newsapi.org/v2/top-headlines?&country=${this.props.country}&category=${this.props.category}&apiKey=aed587c050be4bbbb70d7d31c1fc6331&page=1&pageSize=${this.props.pagesize}`
-        let data = await fetch(url)
-        this.setState({loading: true})
-        let parseddata = await data.json()
-        this.setState({articles: parseddata.articles,
-                       totalresults: parseddata.totalResults,
-                       loading: false})
+        this.updatePage()
     }
     // Function to go on next page -changed the state over here.
     nextPage =async ()=>{
         
-        this.setState({page: this.state.page+1})
+        await this.setState({page: this.state.page+1})
         this.updatePage()
     }
     
     // Function to go on previous page -changed the state over here.
     previousPage =async ()=>{
         
-        this.setState({page: this.state.page-1})
+        await this.setState({page: this.state.page-1})
         this.updatePage()
     }
 
@@ -65,6 +62,8 @@ export class News extends Component {
             <div>
                 <div className="container my-3">
                     <h1 className='my-3 text-center'>News Today - Fastest News Network</h1>
+                    <h2 className=' text-center'>Top {this.capitalizeFirstLetter(this.props.category)} Headlines</h2>
+                    
                     {this.state.loading&&<Spinner />}
                     <div className="row my-3">  
                         {!this.state.loading&&this.state.articles.map((element)=>{
